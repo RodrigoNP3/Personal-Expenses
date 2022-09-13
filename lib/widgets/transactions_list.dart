@@ -1,14 +1,21 @@
 // import 'dart:math';
 
-import 'package:expense_planner_rev01/models/transactions.dart';
+import 'dart:ffi';
+
+import 'package:expense_planner_rev01/models/expense_model.dart';
+import 'package:expense_planner_rev01/database/expenses_database.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../database/expenses_database.dart';
 
 class TransactionList extends StatelessWidget {
-  final List<Transactions> userTransactions;
-  final Function deletTRansaction;
+  List<Expense> userTransactions = [];
+  Function removeTransactions;
 
-  TransactionList(this.userTransactions, this.deletTRansaction);
+  TransactionList(
+    this.userTransactions,
+    this.removeTransactions,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +41,7 @@ class TransactionList extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.all(5.0),
                           child: Text(
-                            '\$${userTransactions[index].amount.toStringAsFixed(2)}',
+                            '\$${userTransactions[index].amount}',
                           ),
                         ),
                       ),
@@ -48,8 +55,9 @@ class TransactionList extends StatelessWidget {
                     subtitle: Text(DateFormat.yMMMMEEEEd()
                         .format(userTransactions[index].date)),
                     trailing: IconButton(
+                      color: Colors.redAccent,
                       onPressed: () {
-                        deletTRansaction(userTransactions[index].id.toString());
+                        removeTransactions(userTransactions[index].id as int);
                       },
                       icon: const Icon(Icons.delete),
                     ),

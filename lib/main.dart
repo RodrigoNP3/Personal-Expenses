@@ -1,6 +1,8 @@
+import 'package:expense_planner_rev01/test_page.dart';
+import 'package:expense_planner_rev01/database/expenses_database.dart';
 import 'package:flutter/material.dart';
 
-import 'package:expense_planner_rev01/models/transactions.dart';
+import 'package:expense_planner_rev01/models/expense_model.dart';
 import 'package:expense_planner_rev01/widgets/transactions_list.dart';
 import 'package:expense_planner_rev01/widgets/new_transaction.dart';
 import 'package:expense_planner_rev01/widgets/chart.dart';
@@ -47,7 +49,8 @@ class _MyAppState extends State<MyApp> {
               ),
         ),
       ),
-      home: const MyHomePage(title: 'Personal Expenses'),
+      home: MyHomePage(title: 'Personal Expenses'),
+      // home: TestPage(),
     );
   }
 }
@@ -63,34 +66,24 @@ class MyHomePage extends StatefulWidget {
 //______________________________________________________________________________class _MyHomePageState
 class _MyHomePageState extends State<MyHomePage> {
   bool isSwitched = false;
-  final List<Transactions> _userTransactions = [
-    // Transactions(
-    //   id: 'T1',
-    //   amount: 69.69,
-    //   title: 'Test',
-    //   date: DateTime.now(),
-    // ),
-    // Transactions(
-    //   id: 'T2',
-    //   amount: 24.50,
-    //   title: 'Test',
-    //   date: DateTime.now(),
-    //   //DateFormat.yMMMMEEEEd().format(DateTime.now())
-    // ),
-  ];
-//______________________________________________________________________________void _deletTransaction
-  void _deletTRansaction(String _id) {
+  List<Expense> _userTransactions = [];
+  bool isLoading = false;
+
+  void _fetchAndSetData() async {
     setState(() {
-      _userTransactions.removeWhere((cx) {
-        return cx.id == _id;
-      });
+      isLoading = true;
+    });
+    _userTransactions = await ExpensesDatabase.instance.readAllExpense();
+    setState(() {
+      isLoading = false;
     });
   }
 
 //______________________________________________________________________________List _recentTransactionList
-  List<Transactions> get _recentTransactionsList {
+  List<Expense> get _recentTransactionsList {
     return _userTransactions.where((tx) {
-      return tx.date.isAfter(
+      final transactionDate = DateTime.parse(tx.date.toString());
+      return transactionDate.isAfter(
         DateTime.now().subtract(
           const Duration(days: 7),
         ),
@@ -98,25 +91,35 @@ class _MyHomePageState extends State<MyHomePage> {
     }).toList();
   }
 
+  @override
+  void initState() {
+    _fetchAndSetData();
+    super.initState();
+  }
+
 //______________________________________________________________________________void _addTransactions
   void _addTransactions(String _title, double _amount, DateTime _selectedDate) {
-    setState(() {
-      _userTransactions.add(
-        Transactions(
-          id: DateTime.now().toString(),
-          amount: _amount,
-          title: _title,
-          date: _selectedDate,
-        ),
-      );
-    });
+    var Id = DateTime.now().toString();
+    Expense expense = Expense(
+      amount: _amount,
+      title: _title,
+      date: _selectedDate,
+    );
+    ExpensesDatabase.instance.create(expense);
+    _fetchAndSetData();
+  }
+
+  //______________________________________________________________________________void _removeTransactions
+  void _removeTransactions(int id) {
+    ExpensesDatabase.instance.delete(id);
+    _fetchAndSetData();
   }
 
 //______________________________________________________________________________appBar
   final appBar = AppBar(
-    // actions: [
-    //    IconButton(onPressed: () , icon: const Icon(Icons.add)),
-    // ],
+    actions: [
+      IconButton(onPressed: null, icon: const Icon(Icons.add)),
+    ],
     title: const Text(
       'Personal Expenses',
       style: TextStyle(fontFamily: 'OpenSans'),
@@ -184,22 +187,28 @@ class _MyHomePageState extends State<MyHomePage> {
                 appBar.preferredSize.height -
                 mediaQuery.padding.top) *
             0.75,
-        child: TransactionList(_userTransactions, _deletTRansaction));
+        child: TransactionList(_userTransactions, _removeTransactions));
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: appBar,
 //______________________________________________________________________________body
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                if (!isLandscape) ..._buildPortraitContent(mediaQuery, _txList),
-                if (isLandscape) ..._buildLandscapeContent(mediaQuery, _txList),
-              ],
-            ),
-          ),
-        ),
+        body: !isLoading
+            ? SafeArea(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      if (!isLandscape)
+                        ..._buildPortraitContent(mediaQuery, _txList),
+                      if (isLandscape)
+                        ..._buildLandscapeContent(mediaQuery, _txList),
+                    ],
+                  ),
+                ),
+              )
+            : Center(
+                child: CircularProgressIndicator(),
+              ),
 
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         floatingActionButton: FloatingActionButton(
@@ -214,6 +223,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 return NewTransaction(_addTransactions);
               },
             ),
+            _fetchAndSetData(),
           },
           child: const Icon(Icons.add),
         ),

@@ -1,3 +1,5 @@
+import 'package:expense_planner_rev01/database/expenses_database.dart';
+import 'package:expense_planner_rev01/models/expense_model.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 // import 'package:flutter/widgets.dart';
@@ -34,6 +36,12 @@ class _NewTransactionState extends State<NewTransaction> {
       enteredAmount,
       _selectedDate,
     );
+
+    // ExpensesDatabase.instance.create(Expense(
+    //   amount: enteredAmount,
+    //   title: enteredTitle,
+    //   date: _selectedDate,
+    // ));
 
     Navigator.pop(context);
   }
