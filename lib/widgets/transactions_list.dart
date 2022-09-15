@@ -71,7 +71,7 @@ class TransactionList extends StatelessWidget {
               builder: ((context, constraints) {
                 return Column(
                   children: <Widget>[
-                    const Text('No Transactions Aded Yet'),
+                    const Text('No Expenses Added Yet'),
                     const SizedBox(height: 10),
                     Container(
                       height: constraints.maxHeight * 0.6,

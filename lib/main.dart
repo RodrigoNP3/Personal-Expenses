@@ -117,9 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 //______________________________________________________________________________appBar
   final appBar = AppBar(
-    actions: [
-      IconButton(onPressed: null, icon: const Icon(Icons.add)),
-    ],
+
     title: const Text(
       'Personal Expenses',
       style: TextStyle(fontFamily: 'OpenSans'),

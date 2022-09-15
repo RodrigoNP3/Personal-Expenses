@@ -78,7 +78,7 @@ class _NewTransactionState extends State<NewTransaction> {
                 margin: const EdgeInsets.all(5),
                 child: const Center(
                   child: Text(
-                    'New Transaction',
+                    'New Expense',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 30,
@@ -143,7 +143,7 @@ class _NewTransactionState extends State<NewTransaction> {
               width: double.infinity,
               child: TextButton(
                 onPressed: () => _submitData(),
-                child: const Text('ADD TRANSACTION'),
+                child: const Text('ADD EXPENSE'),
               ),
             ),
           ],
